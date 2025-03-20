@@ -1,36 +1,36 @@
+import allure
 import pytest
 import requests
-from jsonschema import validate
-
 import data
 import json_schemas
 import urls
+from jsonschema import validate
+from data import Responses
 
 
 class TestRegister:
+    @allure.title('Создать уникального пользователя')
     def test_register_valid_data_200(self, create_user):
-        user, status_code, json = create_user
-        assert status_code == 200
+        user = create_user['user']
+        json = create_user['json']
+        assert create_user['code'] == 200
         validate(json, json_schemas.AUTH)
         assert (json['success'] == True
                 and json['user']['email'] == user['email']
                 and json['user']['name'] == user['name'])
 
+    @allure.title('Создать пользователя, который уже зарегистрирован')
     def test_register_existed_user_403(self, create_user):
-        response = requests.post(urls.REGISTER, json=create_user[0])
+        user = create_user['user']
+        response = requests.post(urls.REGISTER, json=user)
         assert response.status_code == 403
-        assert response.json() == {
-            "success": False,
-            "message": "User already exists"
-        }
+        assert response.json() == Responses.REGISTER_403_0
 
+    @allure.title('Создать пользователя и не заполнить одно из обязательных полей')
     @pytest.mark.parametrize('key', ['email', 'name', 'password'])
     def test_register_empty_field_403(self, key):
         user = data.generate_user()
         del user[key]
         response = requests.post(urls.REGISTER, json=user)
         assert response.status_code == 403
-        assert response.json() == {
-            "success": False,
-            "message": "Email, password and name are required fields"
-        }
+        assert response.json() == Responses.REGISTER_403_1
