@@ -1,0 +1,6 @@
+URL = 'https://stellarburgers.nomoreparties.site/api'
+REGISTER = f'{URL}/auth/register'
+LOGIN = f'{URL}/auth/login'
+USER = f'{URL}/auth/user'
+ORDERS = f'{URL}/orders'
+INGREDIENTS = f'{URL}/ingredients'
